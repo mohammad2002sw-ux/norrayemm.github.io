@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>norrayemm — Portfolio</title>
+<meta name="description" content="norrayemm — 3D models, AI posters, mods & game fixes. Fast delivery and quality work." />
+<meta name="theme-color" content="#070609">
+<link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+<style>
+  :root{
+    --bg:#040406; --panel:#0b0c10; --muted:#a8b2c7; --accent:#9359ff; --accent2:#00e6b8;
+    --glass: rgba(255,255,255,0.04); --radius:14px; --font: 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:var(--font);background:var(--bg);color:#e9edf5;overflow-x:hidden;transition:background .35s}
+  a{color:var(--accent);text-decoration:none}
+  body.fade-out{opacity:0;transition:opacity .35s ease}
+  body{opacity:1;transition:opacity .45s ease}
+  #bgcanvas{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:0.36}
+  #loader{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999}
+  .loader-wrap{display:flex;gap:14px;flex-direction:column;align-items:center}
+  .loader-circle{width:72px;height:72px;border-radius:50%;border:6px solid rgba(255,255,255,0.04);border-top-color:var(--accent);animation:spin 1s linear infinite}
+  .loader-bar{width:320px;height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+  .loader-bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  header{position:fixed;left:18px;right:18px;top:14px;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(0,0,0,0.22);backdrop-filter:blur(8px);border-radius:14px;z-index:50;transition:all .28s}
+  header.scrolled{background:rgba(6,6,9,0.82);box-shadow:0 6px 26px rgba(0,0,0,0.6)}
+  .brand{display:flex;gap:12px;align-items:center;cursor:pointer}
+  .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#050507}
+  nav{display:flex;gap:10px}
+  nav a{padding:8px 12px;border-radius:10px;color:#c6d4ee;font-size:14px}
+  nav a:hover{background:var(--glass)}
+  main{padding-top:110px;min-height:100vh}
+  .container{max-width:1100px;margin:0 auto;padding:28px}
+  .hero{display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:center;padding:48px 0}
+  .headline{font-size:40px;line-height:1.02;font-weight:800;color:#f5f8ff;text-shadow:0 0 18px #7c4dff33}
+  .sub{color:var(--muted);margin-top:12px;margin-bottom:18px}
+  .cta{display:flex;gap:12px;margin-top:16px}
+  .btn{background:linear-gradient(90deg,var(--accent),#a26bff);border:none;padding:12px 16px;border-radius:12px;color:#050507;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  .card-scene{width:100%;height:360px;border-radius:16px;background:linear-gradient(180deg,#0b1220,#05050a);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-style:preserve-3d;transition:transform .25s ease}
+  .glow{position:absolute;width:360px;height:360px;border-radius:50%;filter:blur(36px);background:linear-gradient(45deg,var(--accent),var(--accent2));opacity:0.36;right:-40px;bottom:-60px;pointer-events:none}
+  .model-prop{width:240px;height:240px;border-radius:16px;background:#0e1116;border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+  section{padding:60px 0}
+  h2{font-size:26px;margin-bottom:18px;color:#fff;text-shadow:0 0 10px rgba(124,77,255,0.25)}
+  .projects .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.projects .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+}
+
+.project-card {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+    transition: transform .25s, box-shadow .25s;
+    overflow: hidden;
+}
+
+.project-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+
+/* الصورة داخل الكرت تظهر كاملة */
+.project-card img.card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain; /* يظهر الصورة كاملة */
+    border-radius: 10px;
+    display: block;
+    background-color: #07121a; /* لتغطية أي فراغ حول الصورة */
+}
+
+/* لو تستخدم div.thumb مع background-image */
+.thumb {
+    width: 100%;
+    height: 160px;
+    border-radius: 10px;
+    background: #07121a;
+    background-size: contain; /* يظهر الصورة كاملة */
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+  .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .service{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .contact-grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+  input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:#07070a;color:#e7f1ff}
+  textarea{min-height:140px}
+  footer{padding:24px 0;color:var(--muted);text-align:center}
+  .whatsapp-btn{position:fixed;left:18px;bottom:18px;background:#25d366;color:#05220a;padding:14px;border-radius:14px;box-shadow:0 10px 30px rgba(2,1,6,0.6);z-index:200;display:flex;gap:10px;align-items:center;font-weight:700;border:2px solid rgba(255,255,255,0.03)}
+  .download-btn{background:linear-gradient(90deg,#00e6b8,#7c4dff);color:#041017;padding:10px 12px;border-radius:10px;font-weight:700;border:none;cursor:pointer}
+  .ui-fixed{position:fixed;right:18px;bottom:18px;z-index:300;display:flex;gap:10px;flex-direction:column}
+  .toggle-btn{background:var(--panel);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+  .viewer-wrap{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,#071016,#05060a);height:420px;display:flex;align-items:center;justify-content:center}
+  #viewer3d{width:100%;height:100%;position:relative}
+  @media(max-width:980px){.hero{grid-template-columns:1fr}.card-scene{height:260px}.contact-grid{grid-template-columns:1fr}.projects .grid{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+  .frame-wrap{width:100%;height:100%;border-radius:14px;overflow:hidden;background:#05060a}
+  .frame-wrap iframe{width:100%;height:100%;border:0;display:block}
+</style>
+</head>
+<body>
+  
+<canvas id="bgcanvas" aria-hidden="true"></canvas>
+<div id="loader" role="status" aria-live="polite" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;z-index:9999;background:#000">
+  <div class="loader-wrap" aria-hidden="true">
+    <div class="loader-circle"></div>
+    <div class="loader-bar"><i style="width:0%"></i></div>
+    <div style="color:var(--muted);font-size:13px">Loading...</div>
+  </div>
+</div>
+
+<header id="header" role="banner">
+  <div class="brand" onclick="goHome()" tabindex="0">
+    <div class="logo" aria-hidden="true">NR</div>
+    <div style="line-height:1">
+      <div style="font-weight:700">norrayemm</div>
+      <div style="font-size:12px;color:var(--muted)">Digital Creator • Tech Fixer</div>
+    </div>
+  </div>
+  <nav aria-label="Main navigation">
+    <a href="#home" onclick="linkNav(event)">Home</a>
+    <a href="#projects" onclick="linkNav(event)">Projects</a>
+    <a href="#my3d" onclick="linkNav(event)">3D Viewer</a>
+    <a href="#services" onclick="linkNav(event)">Services</a>
+    <a href="#contact" onclick="linkNav(event)">Contact</a>
+  </nav>
+</header>
+
+<main id="home" style="padding-top:100px">
+  <div class="container">
+    <section class="hero reveal" aria-label="Hero section">
+      <div>
+        <div class="headline">Work — 3D • AI Posters • Game Fixes</div>
+        <div class="sub">Models, posters, mods, quick fixes — I deliver quality, fast.</div>
+        <div class="cta">
+          <button class="btn" onclick="scrollToSection('contact')">Order Service</button>
+          <button class="btn ghost" onclick="scrollToSection('projects')">View Projects</button>
+        </div>
+      </div>
+
+      <div class="card-scene" aria-hidden="false">
+        <div class="glow" aria-hidden="true"></div>
+
+        <div class="frame-wrap" id="heroFrame">
+          <iframe
+            title="Anime Chibi Character 3D Model — norrayemm"
+            src="https://sketchfab.com/models/7c4e518f14034e6c9e2e019f54d6e84e/embed"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects (cleaned and ordered) -->
+    <section id="projects" class="reveal">
+      <h2>Projects</h2>
+      <div class="projects">
+        <div class="toolbar" role="toolbar" aria-label="Filter projects">
+          <button class="btn" data-filter="*">الكل</button>
+          <button class="btn ghost" data-filter="3d">3D</button>
+          <button class="btn ghost" data-filter="poster">بوسترات</button>
+          <button class="btn ghost" data-filter="mods">مودز</button>
+          <button class="btn ghost" data-filter="video">فيديو</button>
+          <button class="btn ghost" data-filter="images">صور AI</button>
+        </div>
+
+        <div class="grid" id="projectsGrid">
+
+          <!-- 3D Character -->
+          <div class="project-card" data-category="3d">
+            <!-- local image you uploaded (local path provided) -->
+            <div class="thumb" style="background-image:url('https://art.mmixel.com/_next/image?url=https%3A%2F%2Fresources.cdn.mmixel.com%2Fpublic%2F68ce0db46e69e20c5aeb26251b0cb857.webp&w=3840&q=75')"></div>
+            <p style="color:var(--muted);margin-top:8px">FBX model showcased in an embedded viewer.</p>
+            <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-start">
+              
+            </div>
+          </div>
+
+          <!-- Poster -->
+          <div class="project-card" data-category="poster">
+            <div class="thumb" style="background-image:url('https://sp.deevid.ai/storage/v1/object/public/user-image/watermarked-42b8be7e-0821-4728-a624-2cf289a21ded.png')"></div>
+            <strong style="display:block;margin-top:10px">Marketing Poster</strong>
+            <p style="color:var(--muted)">AI-generated poster, print-ready.</p>
+          </div>
+
+          <!-- Video -->
+          <div class="project-card" data-category="video">
+            <div class="thumb" style="background-image:url('https://image.cdn2.seaart.me/temp-convert-webp/mp4/2025-10-05/d3hffgde878c739rkeug/5e02eee7-eaf2-486f-9b17-a336bd8ef3e9_low.webp')"></div>
+            <strong style="display:block;margin-top:10px">Video Animation</strong>
+            <p style="color:var(--muted)">Short promotional videos and edits.</p>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn" onclick="openVideo('https://image.cdn2.seaart.me/2025-10-05/d3hffgde878c739rkeug/5e02eee7-eaf2-486f-9b17-a336bd8ef3e9.mp4')">Play clip</button>
+            </div>
+          </div>
+
+          <!-- AI Packs -->
+          <div class="project-card" data-category="images">
+            <div class="thumb" style="background-image:url('https://rapi.pixai.art/img/media/576098981236852994/orig')"></div>
+            <strong style="display:block;margin-top:10px">Image AI Packs</strong>
+            <p style="color:var(--muted)">AI images and retouches (editable).</p>
+          </div>
+
+      
+
+        </div>
+      </div>
+    </section>
+
+   
+    <section id="services" class="reveal">
+      <h2>Services</h2>
+      <div class="services">
+        <div class="service"><strong>Custom 3D Model</strong><div style="color:var(--muted);margin-top:6px">FBX/OBJ/GLB + 2 renders</div></div>
+        <div class="service"><strong>AI Images & Posters</strong><div style="color:var(--muted);margin-top:6px">Anime / Marketing styles</div></div>
+        <div class="service"><strong>Video Editing</strong><div style="color:var(--muted);margin-top:6px">Short promos and edits</div></div>
+      </div>
+    </section>
+
+    <section id="contact" class="reveal">
+      <h2>Contact</h2>
+      <div class="contact-grid">
+        <div class="card" style="padding:18px">
+          <form id="contactForm">
+            <input name="name" placeholder="Your name" required aria-label="Your name" />
+            <br/><br/>
+            <input name="email" type="email" placeholder="Email" required aria-label="Email" />
+            <br/><br/>
+            <textarea name="message" placeholder="Your request" required aria-label="Message"></textarea>
+            <br/><br/>
+            <div style="display:flex;gap:8px">
+              <button class="btn" type="submit">Send</button>
+            </div>
+          </form>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+          <div style="color:var(--muted)">Email: <strong id="emailText">norrayemm@gmail.com</strong></div>
+          <div style="color:var(--muted)">Location: <strong>Amman, Jordan</strong></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container" style="text-align:center;color:var(--muted)">© <span id="year"></span> norrayemm — All rights reserved</div>
+</footer>
+
+<a class="whatsapp-btn" href="https://wa.me/970788637398?text=Hello%20norrayemm" target="_blank" rel="noopener" aria-label="WhatsApp">🟢 Message</a>
+<div class="ui-fixed" aria-hidden="false"><button id="darkToggle" class="toggle-btn" title="Toggle theme">Dark</button></div>
+
+<!-- Three.js libs for viewer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+/* Utilities & UI interactions */
+window.INLINE_MODEL_BASE64 = window.INLINE_MODEL_BASE64 || null;
+window.INLINE_MODEL_TYPE = window.INLINE_MODEL_TYPE || null; // 'fbx' or 'glb'
+
+function scrollToSection(id){ const el = document.getElementById(id); if(!el) return; el.scrollIntoView({behavior:'smooth', block:'start'}); }
+function goHome(){ scrollToSection('home'); }
+function linkNav(e){ e.preventDefault(); const href = e.currentTarget.getAttribute('href'); document.body.classList.add('fade-out'); setTimeout(()=>{ location.href = href; }, 300); }
+
+/* loader animation */
+window.addEventListener('load', ()=>{
+  const ld = document.getElementById('loader');
+  const bar = ld.querySelector('.loader-bar > i');
+  if(!ld) return;
+  let p = 0;
+  const t = setInterval(()=>{
+    p += Math.random()*18;
+    bar.style.width = Math.min(100,p)+'%';
+    if(p>96){
+      clearInterval(t);
+      setTimeout(()=>{ ld.style.opacity='0'; },300);
+      setTimeout(()=>{ ld.style.display='none'; },800);
+    }
+  }, 160);
+});
+
+/* background particles */
+(function(){
+  const canvas = document.getElementById('bgcanvas');
+  const ctx = canvas.getContext && canvas.getContext('2d');
+  if(!ctx) return;
+  let W = canvas.width = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+  window.addEventListener('resize', ()=>{ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const N = isMobile ? 28 : 60;
+  const parts = Array.from({length:N}, ()=>({ x: Math.random()*W, y: Math.random()*H, s: Math.random()*2 + 0.6, vy: 0.2 + Math.random()*0.9, col: (Math.random()>0.6) ? 'rgba(0,230,184,0.12)' : 'rgba(147,89,255,0.1)' }));
+  let raf = null;
+  function frame(){ ctx.clearRect(0,0,W,H); for(const p of parts){ p.y += p.vy; if(p.y > H + 8) p.y = -10; ctx.fillStyle = p.col; ctx.fillRect(p.x, p.y, p.s, p.s); } raf = requestAnimationFrame(frame); }
+  frame();
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ cancelAnimationFrame(raf); raf=null } else if(!raf) frame(); });
+})();
+
+/* header reveal & section reveals */
+(function(){
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', ()=> header.classList.toggle('scrolled', window.scrollY > 60), {passive:true});
+  const reveals = document.querySelectorAll('.reveal');
+  if(reveals.length){
+    const io = new IntersectionObserver((entries, obs)=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){ en.target.classList.add('show'); obs.unobserve(en.target); }
+      });
+    }, {threshold:0.12});
+    reveals.forEach(r=> io.observe(r));
+  }
+})();
+
+/* projects toolbar filtering */
+(function(){
+  const toolbar = document.querySelector('.projects .toolbar');
+  if(!toolbar) return;
+  toolbar.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const f = btn.getAttribute('data-filter');
+    document.querySelectorAll('#projectsGrid .project-card').forEach(card=>{
+      if(!f || f==='*' || card.dataset.category===f) card.style.display='block';
+      else card.style.display='none';
+    });
+  });
+})();
+
+/* video modal */
+function openVideo(path){
+  const modal = document.createElement('div');
+  modal.style.position='fixed'; modal.style.inset='0'; modal.style.background='rgba(0,0,0,0.85)'; modal.style.display='flex';
+  modal.style.alignItems='center'; modal.style.justifyContent='center'; modal.style.zIndex='9999';
+  const vid = document.createElement('video'); vid.src = path; vid.controls = true; vid.autoplay = true;
+  vid.style.maxWidth='90%'; vid.style.maxHeight='80%'; modal.appendChild(vid);
+  modal.addEventListener('click', ()=>{ vid.pause(); modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+/* download helper */
+function downloadModel(path){
+  const a = document.createElement('a');
+  a.href = path; a.download = path.split('/').pop();
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* open viewer from project card */
+function openViewerModel(path){
+  scrollToSection('my3d');
+  if(window.loadModelFromPath) window.loadModelFromPath(path);
+}
+
+/* contact demo */
+(function(){
+  const form = document.getElementById('contactForm');
+  if(!form) return;
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault(); alert('Message received (demo). I will contact you shortly.'); form.reset();
+  });
+})();
+
+/* theme toggle */
+(function(){
+  const btn = document.getElementById('darkToggle'); const key = 'nr_theme_dark';
+  const apply = (dark)=>{ if(dark) document.documentElement.style.setProperty('--bg','#070709'); else document.documentElement.style.setProperty('--bg','#040406'); btn.textContent = dark ? 'Light' : 'Dark'; };
+  const stored = localStorage.getItem(key); const isDark = stored ? stored === '1' : true; apply(isDark);
+  btn.addEventListener('click', ()=>{ const next = !(localStorage.getItem(key)==='1'); localStorage.setItem(key, next ? '1':'0'); apply(next); });
+})();
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ====== Three.js 3D viewer implementation (works with FBX & GLB) ====== */
+(function(){
+  const container = document.getElementById('viewer3d'); if(!container) return;
+
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  renderer.setSize(container.clientWidth || 800, container.clientHeight || 420);
+  renderer.setClearColor(0x07101b, 0);
+  container.innerHTML = '';
+  container.appendChild(renderer.domElement);
+
+  // Scene & Camera
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, (container.clientWidth||800) / (container.clientHeight||420), 0.1, 2000);
+  camera.position.set(0, 1.2, 2.8);
+
+  // Lights
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
+  hemi.position.set(0, 1, 0); scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(5,10,7); scene.add(dir);
+
+  // Ground
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(10,10), new THREE.ShadowMaterial({opacity:0.06}));
+  ground.rotation.x = -Math.PI/2; ground.position.y = -0.6; scene.add(ground);
+
+  // Controls (simple drag rotate)
+  let isDragging=false, prevX=0, prevY=0;
+  let rotY = 0, rotX = 0, targetRotY=0, targetRotX=0;
+  const damp = 0.08;
+  renderer.domElement.addEventListener('pointerdown', e=>{ isDragging=true; prevX=e.clientX; prevY=e.clientY; }, {passive:true});
+  window.addEventListener('pointerup', ()=> isDragging=false);
+  window.addEventListener('pointermove', e=>{ if(!isDragging) return; const dx = (e.clientX - prevX)/200; const dy = (e.clientY - prevY)/300; prevX = e.clientX; prevY = e.clientY; targetRotY += dx; targetRotX += dy; }, {passive:true});
+
+  let modelRoot = new THREE.Group(); scene.add(modelRoot);
+  let autoRotate = true;
+
+  const fbxLoader = new THREE.FBXLoader();
+  const gltfLoader = new THREE.GLTFLoader();
+
+  function clearModel(){
+    modelRoot.traverse(c=>{
+      if(c.geometry) c.geometry.dispose();
+      if(c.material){
+        if(Array.isArray(c.material)) c.material.forEach(m=>m.dispose());
+        else c.material.dispose();
+      }
+    });
+    scene.remove(modelRoot);
+    modelRoot = new THREE.Group();
+    scene.add(modelRoot);
+  }
+
+  function setStatus(txt){ container.innerHTML = txt; }
+
+  function loadFBXFromUrl(path){
+    setStatus('Loading model...');
+    fbxLoader.load(path, (obj)=>{
+      clearModel(); fitAndAdd(obj); setStatus('');
+    }, (xhr)=>{}, (err)=>{ console.error(err); setStatus('Failed to load model'); });
+  }
+
+  function loadGLBFromUrl(path){
+    setStatus('Loading model...');
+    gltfLoader.load(path, (g)=>{
+      clearModel(); fitAndAdd(g.scene || g.scenes[0]); setStatus('');
+    }, undefined, (e)=>{ console.error(e); setStatus('Failed to load model'); });
+  }
+
+  function fitAndAdd(obj){
+    // center and scale object
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = new THREE.Vector3(); box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = (maxDim > 0) ? (1.6 / maxDim) : 1;
+    obj.scale.setScalar(scale);
+    const center = new THREE.Vector3(); box.getCenter(center);
+    obj.position.sub(center);
+    modelRoot.add(obj);
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+  }
+
+  window.loadModelFromPath = function(path){
+    const ext = (path.split('.').pop()||'').toLowerCase();
+    if(ext==='fbx') loadFBXFromUrl(path);
+    else loadGLBFromUrl(path);
+  };
+
+  function tryLoadInline(){
+    if(!window.INLINE_MODEL_BASE64 || !window.INLINE_MODEL_TYPE) return false;
+    try{
+      const bytes = atob(window.INLINE_MODEL_BASE64.replace(/^data:.*;base64,/, ''));
+      const arr = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      const blob = new Blob([arr.buffer], { type: window.INLINE_MODEL_TYPE === 'glb' ? 'model/gltf-binary' : 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      if(window.INLINE_MODEL_TYPE==='fbx') loadFBXFromUrl(url); else loadGLBFromUrl(url);
+      return true;
+    }catch(e){ console.warn('Failed to load inline model', e); return false; }
+  }
+
+  const input = document.getElementById('fileInput');
+  if(input){
+    input.addEventListener('change', (e)=>{
+      const f = e.target.files[0]; if(!f) return;
+      const url = URL.createObjectURL(f);
+      const ext = (f.name.split('.').pop()||'').toLowerCase();
+      if(ext==='fbx') loadFBXFromUrl(url); else loadGLBFromUrl(url);
+    });
+  }
+
+  container.addEventListener('dragover', (e)=>{ e.preventDefault(); container.style.outline='2px dashed rgba(255,255,255,0.06)'; });
+  container.addEventListener('dragleave', ()=>{ container.style.outline=''; });
+  container.addEventListener('drop', (e)=>{ e.preventDefault(); container.style.outline=''; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(!f) return; const url = URL.createObjectURL(f); const ext = (f.name.split('.').pop()||'').toLowerCase(); if(ext==='fbx') loadFBXFromUrl(url); else loadGLBFromUrl(url); });
+
+  function tryLoadDefault(){
+    if(tryLoadInline()) return;
+    const url = 'models/model.fbx';
+    fetch(url, {method:'HEAD'}).then(res=>{
+      if(res.ok) loadFBXFromUrl(url);
+      else container.innerHTML = 'Place a model at <strong>models/model.fbx</strong> or upload one here.';
+    }).catch(()=>{
+      container.innerHTML = 'Place a model at <strong>models/model.fbx</strong> or upload one here.';
+    });
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    rotY += (targetRotY - rotY) * damp;
+    rotX += (targetRotX - rotX) * damp;
+    if(autoRotate && Math.abs(targetRotY) < 0.002) rotY += 0.002;
+    modelRoot.rotation.y = rotY;
+    modelRoot.rotation.x = Math.max(-0.6, Math.min(0.6, rotX));
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.resetCamera = function(){ targetRotX = 0; targetRotY = 0; rotX = rotY = 0; };
+  window.toggleAutoRotate = function(){ autoRotate = !autoRotate; };
+
+  tryLoadDefault();
+})();
+</script>
+</body>
+</html>
